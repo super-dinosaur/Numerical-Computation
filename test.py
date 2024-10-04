@@ -26,5 +26,6 @@ def gaussian_elimination(A, b):
     return x
 
 if __name__ == '__main__':
-    for j in range(2):
-        print(j)
+    array = np.array([1,2,3,4,5])
+    min_arg = np.argmin(array)
+    ic(min_arg)

@@ -100,11 +100,22 @@ class InterpolationToolkit():
         return _D
     
     def Piecewise_Linear(self)->Callable[[float],float]:
-        eval.find_nearest(self.x,0)
         def PL(x):
-            for i in range(len(self.x)-1):
-                if x >= self.x[i] and x <= self.x[i+1]:
-                    return (self.y[i+1]-self.y[i])/(self.x[i+1]-self.x[i])*(x-self.x[i])+self.y[i]
+            k,t = EvalTool.find_nearest(self.x.copy(),x)
+            assert t - k == 1,f't:{t},k:{k},x:{x},xt:{self.x[t]},xk:{self.x[k]}'
+            res = (x-self.x[k+1])/(self.x[k]-self.x[k+1])*self.y[k] + (x-self.x[k])/(self.x[k+1]-self.x[k])*self.y[k+1]
+            return res
+        _PL = np.vectorize(PL)
+        _PL.__name__ = 'Piecewise Linear'
+        return _PL
+    
+    @staticmethod
+    def Piecewise_Linear_debug(x: np.ndarray, y: np.ndarray)->Callable[[float],float]:
+        def PL(u):
+            k,t = EvalTool.find_nearest(x,u)    #带copy进去，要不然改&self.x了
+            assert t - k == 1,f't:{t},k:{k},u:{u},xt:{x[t]},xk:{x[k]}'
+            res = (u-x[k+1])/(x[k]-x[k+1])*y[k] + (u-x[k])/(x[k+1]-x[k])*y[k+1]
+            return res
         _PL = np.vectorize(PL)
         _PL.__name__ = 'Piecewise Linear'
         return _PL

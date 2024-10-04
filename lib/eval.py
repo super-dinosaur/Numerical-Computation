@@ -67,6 +67,8 @@ class EvalTool():
         idx1 = (np.abs(array - value)).argmin()
         array[idx1] = np.inf
         idx2 = (np.abs(array - value)).argmin()
+        if idx1 > idx2:
+            idx1, idx2 = idx2, idx1
         return idx1, idx2
 
 if __name__ == "__main__":
