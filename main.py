@@ -10,7 +10,7 @@ tar_func = lambda x: f(x,c,d,e,f_)
 start = -30
 end = 30
 number_points = 50
-
+sam = 'Chebyshev'
 list_methods = [method for method in dir(lib.InterpolationToolkit) if method[0] != '_' and not method.endswith('debug')]
 ic(list_methods)
 
@@ -19,8 +19,11 @@ if __name__ == '__main__':
         tar_func = tar_func,
         num_points = number_points,
         start = start,
-        end = end
+        end = end,
+        sampling_option = sam
     )
+    if sam == 'Chebyshev':
+        list_methods.remove('DDN')
     for method in list_methods:
         ic(method)
         func = getattr(interpolator,method)()
@@ -30,5 +33,5 @@ if __name__ == '__main__':
             num_experimental_points = 9000,
             start = start,
             end = end,
-            c=c,d=d,e=e,f=f_,n_plus_1=number_points
+            c=c,d=d,e=e,f=f_,n_plus_1=number_points,sampling_option=sam
         )

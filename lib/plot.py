@@ -10,7 +10,7 @@ from icecream import ic
 
 def plot(func_fitting:Callable[[float],float],
          func_target:Callable[[float],float],
-         num_experimental_points:int,start:int,end:int,c,d,e,f,n_plus_1
+         num_experimental_points:int,start:int,end:int,c,d,e,f,n_plus_1,sampling_option
     )->None:
      x = np.linspace(start,end,num_experimental_points)
      y_fitting = func_fitting(x)
@@ -34,18 +34,25 @@ def plot(func_fitting:Callable[[float],float],
      plt.title('|gt - pred|')
      #把error_total标在图上
      plt.text(x[-1],y_sub[-1],f'{error_totl:.2e}',fontsize=12)
-     path_fig = osp.join(config.PATH_DATA,'fig',f'{func_fitting.__name__}.png')
+
+     if sampling_option == 'uniform':
+         path_fig = osp.join(config.PATH_UNIF,'fig',f'{func_fitting.__name__}.png')
+     elif sampling_option == 'Chebyshev':
+         path_fig = osp.join(config.PATH_CHEB,'fig',f'{func_fitting.__name__}.png')
      ic(path_fig)
      plt.savefig(path_fig)
-     # plt.show()
-     with open(osp.join(config.PATH_DATA,'error',f'{func_fitting.__name__}.json'),'w') as file:
+
+     path_json = osp.join('/'.join(path_fig.split('/')[:-2]),'error',f'{func_fitting.__name__}.json')
+     ic(path_json)
+     with open(path_json,'w') as file:
          json.dump({
                'func_target':'%d*sin(%d*x) + %d*cos(%d*x)'%(c,d,e,f),
                'start':start,
                'end':end,
                'm':num_experimental_points,
                'n+1':n_plus_1,
-               'error_totl':f'{error_totl:.2e}'
+               'error_totl':f'{error_totl:.2e}',
+               'sampling_option':sampling_option
           },file,indent=4)
      plt.close()
 

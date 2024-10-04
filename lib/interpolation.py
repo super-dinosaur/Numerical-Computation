@@ -19,6 +19,8 @@ class InterpolationToolkit():
         self.end = end
         if sampling_option == 'uniform':
             self.x = np.linspace(start, end, num_points)
+        elif sampling_option == 'Chebyshev':
+            self.x = EvalTool.chebyshev_nodes(start, end, num_points-1)
         self.y = self.tar_func(self.x)
         
     def lagrange(self)->Callable[[float],float]:

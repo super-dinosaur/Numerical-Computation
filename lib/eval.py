@@ -88,6 +88,12 @@ class EvalTool():
     def compute_derivative(f: Callable[[float], float], x_val: float, dx: float = 1e-6) -> float:
         return (f(x_val + dx) - f(x_val - dx)) / (2 * dx)
 
+    @staticmethod   
+    def chebyshev_nodes(a: float, b: float, n: int) -> np.ndarray:
+        """生成区间 [a, b] 上的 n+1 个切比雪夫零点"""
+        i = np.arange(n+1)
+        x = 0.5 * (a + b) + 0.5 * (b - a) * np.cos((2 * i + 1) / (2 * (n + 1)) * np.pi)
+        return x
 if __name__ == "__main__":
     x = np.linspace(0,5,5)
     y = np.sin(x)

@@ -4,5 +4,6 @@
     "end": 30,
     "m": 9000,
     "n+1": 50,
-    "error_totl": "2.47e+09"
+    "error_totl": "1.17e-01",
+    "sampling_option": "uniform"
 }

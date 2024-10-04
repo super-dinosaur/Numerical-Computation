@@ -25,29 +25,4 @@ $f(x) = c \cdot \sin(dx) + e \cdot \cos(fx)$
 #### 输出：
 对比函数曲线，平均误差
 
-#### 文件结构：
-/your_project
-│
-├── /data
-│   ├── input_data.csv
-│   └── output_data.csv
-│
-├── /script
-│   ├── preprocess_data.py
-│   └── plot_results.py
-│
-├── /lib
-│   ├── __init__.py              # 标记 lib 目录为一个 Python 包
-│   ├── interpolation.py         # 各种插值方法
-│   ├── vandermonde.py
-│   ├── lagrange.py
-│   ├── newton.py
-│   └── hermite.py
-│
-├── config.py                    # 项目配置文件
-│
-├── run_experiment.sh            # 一键运行脚本
-│
-├── main.py                      # 主程序文件
-│
-└── README.md                    # 项目说明文档
+#### 文件结构:
