@@ -14,7 +14,17 @@ def plot(func_fitting:Callable[[float],float],
      y_fitting = func_fitting(x)
      y_func_target = func_target(x)
      y_sub = np.abs(y_fitting - y_func_target)
-     plt.plot(x,y_sub,label='Sub')
+     # 计算num_experimental_points个点的平均误差
+     a = int(0.4*num_experimental_points)
+     b = int(0.6*num_experimental_points)
+     ic()
+     ic(x[a],x[b])
+     error_seg = np.mean(y_sub[a:b])
+     error_totl = np.mean(y_sub)
+     ic(f'{error_seg:.2e}')
+     ic(f'{error_totl:.2e}')
+
+     plt.plot(x,y_sub,label='ERROR')
      plt.legend()
      plt.grid(True)
      plt.xlabel('X-axis')

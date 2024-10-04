@@ -4,14 +4,14 @@ import numpy as np
 def f(x,c,d,e,f):
     return c*np.sin(d*x) + e*np.cos(f*x)
 tar_func = lambda x: f(x,3,1,4,2)
-start = 0
-end = 100
+start = -30
+end = 30
 
 if __name__ == '__main__':
 
     interpolator = lib.InterpolationToolkit(
         tar_func = tar_func,
-        num_points = 30,
+        num_points = 50,
         start = start,
         end = end
     )

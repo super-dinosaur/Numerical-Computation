@@ -31,26 +31,48 @@ def gaussian_elimination(A, b):
     
     return x
 
-class eval():
+class EvalTool():
     @staticmethod   
     def gaussian_elimination(A,b):
         return gaussian_elimination(A,b)
     
     @staticmethod
-    def divided_diff_TABLE(x: np.ndarray, 
-                           y: np.ndarray) -> np.ndarray:
+    def mean_diff_table(x: np.ndarray, 
+                        y: np.ndarray
+        ) -> np.ndarray:
         n = len(x)-1
         table = np.zeros((n+1,n+1))
         table[:,0] = y
         for j in range(1,n+1):
             for i in range(j,n+1):
-                table[i,j] = (table[i,j-1] - table[i-1,j-1])/(x[i]-x[i-1])
+                table[i,j] = (table[i,j-1] - table[i-1,j-1])/(x[i]-x[i-j])
         return table
+    
+    @staticmethod
+    def div_diff_table(x: np.ndarray, 
+                       y: np.ndarray
+        ) -> np.ndarray:
+        n = len(x)-1
+        table = np.zeros((n+1,n+1))
+        table[:,0] = y
+        for j in range(1,n+1):
+            for i in range(j,n+1):
+                table[i,j] = table[i,j-1] - table[i-1,j-1]
+        return table
+    
+    @staticmethod
+    def find_nearest(array: np.ndarray, 
+                     value: floating
+        ) -> Tuple[int, int]:
+        idx1 = (np.abs(array - value)).argmin()
+        array[idx1] = np.inf
+        idx2 = (np.abs(array - value)).argmin()
+        return idx1, idx2
 
 if __name__ == "__main__":
     x = np.linspace(0,5,5)
     y = np.sin(x)
-    table = eval.divided_diff_TABLE(x,y)
+    table = EvalTool.mean_diff_table(x,y)
     x_table = np.hstack([x.reshape(-1,1),table])
     ic(osp.join(os.getcwd(),"x_table.txt"))
     with open("x_table.txt","w") as f:

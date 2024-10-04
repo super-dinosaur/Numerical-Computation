@@ -26,11 +26,5 @@ def gaussian_elimination(A, b):
     return x
 
 if __name__ == '__main__':
-    A = np.array([[2.34, 1, -1], [-3, -1, 2], [-2, 1, 2]])
-    b = np.array([8, -11, -3])
-    ic(np.linalg.solve(A, b))
-    x = gaussian_elimination(A, b)
-    ic(x)
-    exit()
-    ic(np.linalg.solve(A, b))
-    ic(np.allclose(np.dot(A, x), b))
+    for j in range(2):
+        print(j)
