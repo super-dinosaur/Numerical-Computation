@@ -1,4 +1,11 @@
 import numpy as np
+import os
+import os.path as osp
+
+from numpy.typing import NDArray
+from numpy import floating  
+from typing import List, Tuple, Any
+from icecream import ic
 
 def gaussian_elimination(A, b):
     n = len(b)
@@ -23,3 +30,29 @@ def gaussian_elimination(A, b):
         x[i] = (Ab[i, -1] - np.dot(Ab[i, i+1:n], x[i+1:n])) / Ab[i, i]
     
     return x
+
+class eval():
+    @staticmethod   
+    def gaussian_elimination(A,b):
+        return gaussian_elimination(A,b)
+    
+    @staticmethod
+    def divided_diff_TABLE(x: np.ndarray, 
+                           y: np.ndarray) -> np.ndarray:
+        n = len(x)-1
+        table = np.zeros((n+1,n+1))
+        table[:,0] = y
+        for j in range(1,n+1):
+            for i in range(j,n+1):
+                table[i,j] = (table[i,j-1] - table[i-1,j-1])/(x[i]-x[i-1])
+        return table
+
+if __name__ == "__main__":
+    x = np.linspace(0,5,5)
+    y = np.sin(x)
+    table = eval.divided_diff_TABLE(x,y)
+    x_table = np.hstack([x.reshape(-1,1),table])
+    ic(osp.join(os.getcwd(),"x_table.txt"))
+    with open("x_table.txt","w") as f:
+        f.write(str(x_table))
+        

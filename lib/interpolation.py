@@ -1,7 +1,8 @@
 import numpy as np
 from typing import Callable
 from icecream import ic
-from lib.eval import gaussian_elimination
+from lib.eval import gaussian_elimination, eval
+from scipy.interpolate import KroghInterpolator
 
 class InterpolationToolkit():
     def __init__(self, 
@@ -38,7 +39,7 @@ class InterpolationToolkit():
     
     def vandermonde(self)->Callable[[float],float]:
         A = np.array([[xi**i for i in range(self.num_points)] for xi in self.x])
-        coef = gaussian_elimination(A,self.y)
+        coef = eval.gaussian_elimination(A,self.y)
         def V(x):
             return np.sum(np.array([coef[i]*x**i for i in range(len(coef))]))
         _V= np.vectorize(V)
@@ -46,15 +47,24 @@ class InterpolationToolkit():
         return _V
     
     def newton(self)->Callable[[float],float]:
-        def divided_diff(x,y):
-            if len(x) == 1:
-                return y[0]
-            else:
-                return (divided_diff(x[1:],y[1:]) - divided_diff(x[:-1],y[:-1]))/(x[-1]-x[0])
+        div_diff_table = eval.divided_diff_TABLE(self.x,self.y)
         def N(x):
-            return np.sum(np.array([divided_diff(self.x[:i+1],self.y[:i+1])*np.prod(np.array([x-xi for xi in self.x[:i]])) for i in range(self.num_points)]))
+            n = len(self.x)-1
+            res = self.y[0]
+            for i in range(n):
+                correction = div_diff_table[i+1,i+1]*np.prod(np.array([x-self.x[j] for j in range(i)]))
+                res += correction
+            return res
         _N = np.vectorize(N)
         _N.__name__ = 'newton'
         return _N
+    
+    def newton_gt(self)->Callable[[float],float]:
+        # 用库函数写一个newton插值函数
+        _N = KroghInterpolator(self.x,self.y)
+        _N.__name__ = 'newton_gt'
+        return _N
+
+        
 
     

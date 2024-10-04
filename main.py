@@ -16,7 +16,7 @@ if __name__ == '__main__':
         end = end
     )
     lib.plot(
-        func_fitting = interpolator.vandermonde(),
+        func_fitting = interpolator.newton(),
         func_target = tar_func,
         num_experimental_points = 9000,
         start = start,
