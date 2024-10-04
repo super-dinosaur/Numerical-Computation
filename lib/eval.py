@@ -4,7 +4,7 @@ import os.path as osp
 
 from numpy.typing import NDArray
 from numpy import floating  
-from typing import List, Tuple, Any
+from typing import List, Tuple, Any, Callable
 from icecream import ic
 
 def gaussian_elimination(A, b):
@@ -70,6 +70,23 @@ class EvalTool():
         if idx1 > idx2:
             idx1, idx2 = idx2, idx1
         return idx1, idx2
+    
+    @staticmethod
+    def gradient(x: np.ndarray, 
+                 y: np.ndarray
+        ) -> np.ndarray:
+        n = len(x)
+        grad = np.zeros(n)
+        grad[0] = (y[1] - y[0])/(x[1] - x[0])
+        for i in range(1,n-1):
+            grad[i] = (y[i+1] - y[i-1])/(x[i+1] - x[i-1])
+        grad[n-1] = (y[n-2] - y[n-3])/(x[n-2] - x[n-3])
+        # grad[n] = grad[n-1] # 不知道可不可以，但是没有的话会出问题，近似的话应该差不多，反正最后一个点也龙格了，无所谓了
+        return grad
+    
+    @staticmethod
+    def compute_derivative(f: Callable[[float], float], x_val: float, dx: float = 1e-6) -> float:
+        return (f(x_val + dx) - f(x_val - dx)) / (2 * dx)
 
 if __name__ == "__main__":
     x = np.linspace(0,5,5)

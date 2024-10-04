@@ -1,35 +1,34 @@
 import lib.__init__ as lib
 import numpy as np
 
-def f(x,c,d,e,f):
-    return c*np.sin(d*x) + e*np.cos(f*x)
-tar_func = lambda x: f(x,3,1,4,2)
+from icecream import ic
+
+def f(x,c,d,e,f_):
+    return c*np.sin(d*x) + e*np.cos(f_*x)
+c,d,e,f_ = 3,1,4,2
+tar_func = lambda x: f(x,c,d,e,f_)
 start = -30
 end = 30
+number_points = 50
+
+list_methods = [method for method in dir(lib.InterpolationToolkit) if method[0] != '_' and not method.endswith('debug')]
+ic(list_methods)
 
 if __name__ == '__main__':
-
     interpolator = lib.InterpolationToolkit(
         tar_func = tar_func,
-        num_points = 50,
+        num_points = number_points,
         start = start,
         end = end
     )
-    lib.plot(
-        func_fitting = interpolator.Piecewise_Linear(),
-        func_target = tar_func,
-        num_experimental_points = 9000,
-        start = start,
-        end = end
-    )
-
-
-# #写一个numpy库函数的lagrant插值函数px，真实函数还是f(x,1,2,3,4)，plot出来他们的对比图
-#     p = np.poly1d(np.polyfit(interpolator.x,interpolator.y,interpolator.num_points-1))
-#     lib.plot(
-#         func_fitting = p,
-#         func_target = lambda x: f(x,1,1,0,0),
-#         num_experimental_points = 1000000,
-#         start = 0,
-#         end = 10
-#     )
+    for method in list_methods:
+        ic(method)
+        func = getattr(interpolator,method)()
+        lib.plot(
+            func_fitting = func,
+            func_target = tar_func,
+            num_experimental_points = 9000,
+            start = start,
+            end = end,
+            c=c,d=d,e=e,f=f_,n_plus_1=number_points
+        )

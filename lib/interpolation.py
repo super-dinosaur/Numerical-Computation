@@ -3,6 +3,7 @@ from typing import Callable
 from icecream import ic
 from lib.eval import gaussian_elimination, EvalTool
 from scipy.interpolate import KroghInterpolator
+from scipy.misc import derivative
 
 class InterpolationToolkit():
     def __init__(self, 
@@ -29,13 +30,6 @@ class InterpolationToolkit():
         _L = np.vectorize(L)
         _L.__name__ = 'lagrange'
         return _L
-
-    def vandermonde_gt(self)->Callable[[float],float]:
-        A = np.vander(self.x, increasing=True)
-        coef = np.linalg.solve(A,self.y)
-        def V(x):
-            return np.sum(np.array([coef[i]*x**i for i in range(len(coef))]))
-        return np.vectorize(V)
     
     def vandermonde(self)->Callable[[float],float]:
         A = np.array([[xi**i for i in range(self.num_points)] for xi in self.x])
@@ -57,11 +51,6 @@ class InterpolationToolkit():
             return res
         _N = np.vectorize(N)
         _N.__name__ = 'newton'
-        return _N
-    
-    def newton_gt(self)->Callable[[float],float]:
-        _N = KroghInterpolator(self.x,self.y)
-        _N.__name__ = 'newton_gt'
         return _N
     
     def DDN(self)->Callable[[float],float]:
@@ -119,3 +108,17 @@ class InterpolationToolkit():
         _PL = np.vectorize(PL)
         _PL.__name__ = 'Piecewise Linear'
         return _PL
+    
+    def Piecewise_Cubic_Hermite(self)->Callable[[float],float]:
+        m = np.array([EvalTool.compute_derivative(self.tar_func, xi) for xi in self.x])        
+        def PCH(x):
+            k,t = EvalTool.find_nearest(self.x.copy(),x)
+            assert t - k == 1,f't:{t},k:{k},x:{x},xt:{self.x[t]},xk:{self.x[k]}'
+            I = ((x-self.x[k+1])/(self.x[k]-self.x[k+1]))**2 * (1+2*(x-self.x[k])/(self.x[k+1]-self.x[k]))*self.y[k]
+            I += ((x-self.x[k])/(self.x[k+1]-self.x[k]))**2 * (1+2*(x-self.x[k+1])/(self.x[k]-self.x[k+1]))*self.y[k+1]
+            I += ((x-self.x[k+1])/(self.x[k]-self.x[k+1]))**2 * (x-self.x[k])*(m[k])
+            I += ((x-self.x[k])/(self.x[k+1]-self.x[k]))**2 * (x-self.x[k+1])*(m[k+1])
+            return I
+        _PCH = np.vectorize(PCH)
+        _PCH.__name__ = 'Piecewise Cubic Hermite'
+        return _PCH
