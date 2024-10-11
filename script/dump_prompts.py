@@ -4,6 +4,7 @@ import SCRIPT_CONFITG
 import os.path as osp
 
 from icecream import ic
+sampling_option = 'uniform'
 
 if __name__ == '__main__':
     # modify the prompts every time you run this script
@@ -13,7 +14,7 @@ if __name__ == '__main__':
         'num_points': 50,
         'start': -1,
         'end': 1,
-        'sampling_option': 'random'
+        'sampling_option': sampling_option
     }
     path_prompts = osp.join(SCRIPT_CONFITG.PATH_DATA,'prompts','prompts.json')
     with open(path_prompts, 'w') as file:
