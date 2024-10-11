@@ -1,5 +1,7 @@
 import numpy as np
 import json
+import local_setting
+import os.path as osp
 
 from typing import Callable
 from icecream import ic
@@ -23,12 +25,16 @@ class InterpolationToolkit():
             self.x = np.linspace(start, end, num_points)
         elif sampling_option == 'Chebyshev':
             self.x = EvalTool.chebyshev_nodes(start, end, num_points-1)
+        elif sampling_option == 'random':
+            self.x = np.random.uniform(start, end, num_points)
+        self.record_x(sampling_option)
         self.y = self.tar_func(self.x)
 
     @staticmethod   
     def build(path_prompts:str)->'InterpolationToolkit':
         with open(path_prompts, 'r') as file:
             prompts = json.load(file)
+        prompts['tar_func'] = eval(prompts['tar_func'])
         return InterpolationToolkit(**prompts)
     
     def newton(self)->Callable[[float],float]:
@@ -44,3 +50,12 @@ class InterpolationToolkit():
         _N.__name__ = 'newton'
         return _N
     
+    def record_x(self,sampling_option:str):
+        path_x = osp.join(local_setting.PATH_DATA,'prompts','x_table.json')
+        dict_record = {
+            'method': sampling_option,
+            'x': self.x.tolist(),
+        }
+        with open(path_x, 'w') as file:
+            json.dump(dict_record, file, indent=4)
+        ic(path_x)        

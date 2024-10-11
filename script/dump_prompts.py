@@ -1,17 +1,21 @@
 import json
 import numpy as np
-import local_setting
+import SCRIPT_CONFITG
+import os.path as osp
 
 from icecream import ic
 
 if __name__ == '__main__':
+    # modify the prompts every time you run this script
+    #assert sampling option in ['uniform','Chebyshev','random']
     prompts = {
-        'tar_func': lambda x: np.sin(x),
-        'num_points': 5,
-        'start': 0,
-        'end': np.pi,
-        'sampling_option': 'uniform'
+        'tar_func': 'lambda x: 1/(1+25*x**2)',
+        'num_points': 50,
+        'start': -1,
+        'end': 1,
+        'sampling_option': 'random'
     }
-    with open('prompts.json', 'w') as file:
+    path_prompts = osp.join(SCRIPT_CONFITG.PATH_DATA,'prompts','prompts.json')
+    with open(path_prompts, 'w') as file:
         json.dump(prompts, file, indent=4)
-    ic(prompts)
+    ic(path_prompts)
