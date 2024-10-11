@@ -6,6 +6,7 @@ from numpy.typing import NDArray
 from numpy import floating  
 from typing import List, Tuple, Any, Callable
 from icecream import ic
+from scipy.integrate import quad
 
 def gaussian_elimination(A, b):
     n = len(b)
@@ -94,6 +95,55 @@ class EvalTool():
         i = np.arange(n+1)
         x = 0.5 * (a + b) + 0.5 * (b - a) * np.cos((2 * i + 1) / (2 * (n + 1)) * np.pi)
         return x
+    
+    @staticmethod
+    def weight_function(x: float) -> float:
+        return 1 / np.sqrt(1 - x**2)
+
+    @staticmethod
+    def integral(
+        f_: Callable[[float], float],
+        g_: Callable[[float], float],
+        a: float,
+        b: float
+    ) -> float:
+        # Transformation to map [a, b] to [-1, 1]
+        transform = lambda x: (2 * x - (a + b)) / (b - a)
+        F = lambda x: EvalTool.weight_function(transform(x)) * f_(x) * g_(x)
+        
+        # Perform the integral on the standard interval [-1, 1]
+        result, _ = quad(F, -1, 1)
+        return result * (b - a) / 2  # Adjust the integral value for the scaling factor
+
+
+    @staticmethod
+    def get_chebyshev_basis(
+        x: np.ndarray,
+        start: float,
+        end: float,
+        num_points: int
+    ) -> List[Callable[[float], float]]:
+        # Transform to map [start, end] to [-1, 1]
+        transform = lambda x: (2 * x - (start + end)) / (end - start)
+        inverse_transform = lambda x: 0.5 * ((end - start) * x + (start + end))
+        
+        P = [lambda x: 1]
+        alphas = [0]
+        betas = []
+        alpha1 = EvalTool.integral(lambda x: transform(x), P[0], -1, 1) / EvalTool.integral(P[0], P[0], -1, 1)
+        alphas.append(alpha1)
+        P.append(lambda x: transform(x) - alpha1)
+        
+        for k in range(1, num_points):
+            alpha_k1 = EvalTool.integral(lambda x: transform(x) * P[k](x), P[k], -1, 1) / EvalTool.integral(P[k], P[k], -1, 1)
+            alphas.append(alpha_k1)
+            beta_k = EvalTool.integral(P[k], P[k], -1, 1) / EvalTool.integral(P[k - 1], P[k - 1], -1, 1)
+            betas.append(beta_k)
+            def P_next(x, k=k, alpha_k1=alpha_k1, beta_k=beta_k):
+                return (transform(x) - alpha_k1) * P[k](x) - beta_k * P[k - 1](x)
+            P.append(P_next)
+        return P
+    
 if __name__ == "__main__":
     x = np.linspace(0,5,5)
     y = np.sin(x)

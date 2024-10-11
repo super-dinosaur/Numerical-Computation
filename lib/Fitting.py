@@ -5,11 +5,10 @@ import os.path as osp
 
 from typing import Callable
 from icecream import ic
-from lib.eval import gaussian_elimination, EvalTool
-from scipy.interpolate import KroghInterpolator
-from scipy.misc import derivative
+from lib.eval import  EvalTool
+from lib.Chebytool import ChebyshevApproximator
 
-class InterpolationToolkit():
+class FittingToolkit():
     def __init__(self, 
                  tar_func: Callable[[float],float], 
                  num_points: int, 
@@ -31,11 +30,11 @@ class InterpolationToolkit():
         self.y = self.tar_func(self.x)
 
     @staticmethod   
-    def build(path_prompts:str)->'InterpolationToolkit':
+    def build(path_prompts:str)->'FittingToolkit':
         with open(path_prompts, 'r') as file:
             prompts = json.load(file)
         prompts['tar_func'] = eval(prompts['tar_func'])
-        return InterpolationToolkit(**prompts)
+        return FittingToolkit(**prompts)
     
     def newton(self)->Callable[[float],float]:
         div_diff_table = EvalTool.mean_diff_table(self.x,self.y)
@@ -50,6 +49,16 @@ class InterpolationToolkit():
         _N.__name__ = 'newton'
         return _N
     
+    def LeastSquare(self) -> Callable[[float], float]:
+        # 使用 Chebyshev 节点来拟合函数
+        ch = ChebyshevApproximator(
+            tar_func=self.tar_func,
+            start=self.start,
+            end=self.end,
+            num_points=self.num_points
+        )
+        return ch.least_squares()
+
     def record_x(self,sampling_option:str):
         path_x = osp.join(local_setting.PATH_DATA,'prompts','x_table.json')
         dict_record = {

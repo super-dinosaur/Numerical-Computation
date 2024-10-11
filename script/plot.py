@@ -9,6 +9,30 @@ from typing import Callable
 
 class ploter():
     @staticmethod
+    def show(
+        x:np.ndarray,
+        pred_:Callable[[float],float],
+        sampling_option:str,
+        gt_:Callable[[float],float]=None
+    ):
+        x_plot = np.linspace(x[0],x[-1],20000)
+        pred = pred_(x_plot)
+        gt = gt_(x_plot)
+        plt.plot(x_plot,pred,label=sampling_option)
+        if gt_ is not None:
+            plt.plot(x_plot,gt,label='Ground Truth')
+        plt.legend()
+        plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+        plt.title('Fitting Plot')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        path_show = osp.join(SCRIPT_CONFITG.PATH_DATA,'show.png')
+        plt.savefig(path_show)
+        plt.show()
+        ic(path_show)
+        
+
+    @staticmethod
     def sub_error(
         x:np.ndarray,
         gt_:Callable[[float],float],
