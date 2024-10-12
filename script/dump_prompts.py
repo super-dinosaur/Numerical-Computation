@@ -18,8 +18,8 @@ if __name__ == '__main__':
     # }
     prompts = {
         'tar_func': 'lambda x: 5*np.sin(1*x) + 4*np.cos(3*x)',
-        'num_points': 5,
-        'start': -1,
+        'num_points': 15,
+        'start': -9,
         'end': 1,
         'sampling_option': sampling_option
     }

@@ -65,7 +65,7 @@ class ploter():
         }
         with open(path_save_error,'wb') as file:
             pkl.dump(dict_error,file)
-        ic(path_save_error)
+        ic(path_sub_error)
 
     @staticmethod
     def plot_contrast(path_error: dict):

@@ -1,7 +1,9 @@
 import numpy as np
+import random
 import matplotlib.pyplot as plt
 from scipy.integrate import quad
 from typing import Callable, List
+from icecream import ic
 
 class ChebyshevApproximator:
     def __init__(self, tar_func: Callable[[float], float], start: float, end: float, num_points: int):
@@ -44,10 +46,38 @@ class ChebyshevApproximator:
             integrand = lambda x: self.weight_function(x) * self.tar_func(self.inverse_transform(x)) * P_k(x)
             a_k = self.integral(integrand, -1, 1) / self.integral(lambda x: self.weight_function(x) * P_k(x) ** 2, -1, 1)
             coefficients.append(a_k)
-        
         def S(x):
             # Calculate the approximation S(x) using the coefficients and basis
             x_transformed = self.transform(x)
             return sum(a_k * P_k(x_transformed) for a_k, P_k in zip(coefficients, chebyshev_basis))
         
         return np.vectorize(S)
+        
+    def least_squares_perpetuated(self) -> Callable[[float], float]:
+        # Get the Chebyshev basis functions
+        chebyshev_basis = self.get_chebyshev_basis()
+        coefficients = []
+        dertas = []
+        chance = int(self.num_points / 4)
+        for P_k in chebyshev_basis:
+            # Define the integrand using the weight function and the target function with noise added
+            derta = random.uniform(1, 5)
+            if chance > 0:
+                chance -= 1
+                dertas.append(derta)
+                integrand = lambda x: self.weight_function(x) * (self.tar_func(self.inverse_transform(x)) + derta) * P_k(x)
+            else : integrand = lambda x: self.weight_function(x) * self.tar_func(self.inverse_transform(x)) * P_k(x)
+            a_k = self.integral(integrand, -1, 1) / self.integral(lambda x: self.weight_function(x) * P_k(x) ** 2, -1, 1)
+            coefficients.append(a_k)
+            # integrand = lambda x: self.weight_function(x) * (self.tar_func(self.inverse_transform(x)) + np.random.normal(0, 1)) * P_k(x)
+            # a_k = self.integral(integrand, -1, 1) / self.integral(lambda x: self.weight_function(x) * P_k(x) ** 2, -1, 1)
+            # coefficients.append(a_k)
+        
+        def S(x):
+            # Calculate the approximation S(x) using the coefficients and basis
+            x_transformed = self.transform(x)
+            return sum(a_k * P_k(x_transformed) for a_k, P_k in zip(coefficients, chebyshev_basis))
+        
+        return np.vectorize(S), dertas
+
+        

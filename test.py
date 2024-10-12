@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import quad
 from typing import Callable, List
+from icecream import ic
 
 class ChebyshevApproximator:
     def __init__(self, tar_func: Callable[[float], float], start: float, end: float, num_points: int):
@@ -52,29 +53,5 @@ class ChebyshevApproximator:
         
         return np.vectorize(S)
 
-# Test the implementation with the given conditions
-tar_func = lambda x: 5 * np.sin(1 * x) + 4 * np.cos(3 * x)
-start, end = 1, 5
-num_points = 8
-
-approximator = ChebyshevApproximator(tar_func, start, end, num_points)
-S = approximator.least_squares()
-
-# Generate sample points and calculate the original and approximated values
-x_test = np.linspace(start, end, 1000)
-y_true = tar_func(x_test)
-y_approx = S(x_test)
-
-# Calculate the average error
-average_error = np.mean(np.abs(y_true - y_approx))
-
-# Plot the results
-plt.figure(figsize=(10, 6))
-plt.plot(x_test, y_true, label="Original Function", color="blue")
-plt.plot(x_test, y_approx, label="Chebyshev Approximation", linestyle='--', color="red")
-plt.title(f"Chebyshev Approximation vs Original Function\nAverage Error: {average_error:.5f}")
-plt.xlabel("x")
-plt.ylabel("y")
-plt.legend()
-plt.grid(True)
-plt.show()
+if __name__ == '__main__':
+    ic(np.random.normal(0, 0.1, 10))

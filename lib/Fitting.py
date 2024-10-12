@@ -57,7 +57,8 @@ class FittingToolkit():
             end=self.end,
             num_points=self.num_points
         )
-        return ch.least_squares()
+        # return ch.least_squares()
+        return ch.least_squares_perpetuated()
 
     def record_x(self,sampling_option:str):
         path_x = osp.join(local_setting.PATH_DATA,'prompts','x_table.json')
