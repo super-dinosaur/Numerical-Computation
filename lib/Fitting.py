@@ -37,7 +37,19 @@ class FittingToolkit():
         prompts['tar_func'] = eval(prompts['tar_func'])
         ic(prompts['tar_func'])
         return FittingToolkit(**prompts)
-    
+
+    def LeastSquare(self) -> Callable[[float], float]:
+        # 使用 Chebyshev 节点来拟合函数
+        ch = ChebyshevApproximator(
+            tar_func=self.tar_func,
+            start=self.start,
+            end=self.end,
+            num_points=self.num_points
+        )
+
+        return ch.least_squares()
+        # return ch.least_squares_perpetuated()
+
     def newton(self)->Callable[[float],float]:
         div_diff_table = EvalTool.mean_diff_table(self.x,self.y)
         def N(x):
@@ -51,17 +63,7 @@ class FittingToolkit():
         _N.__name__ = 'newton'
         return _N
     
-    def LeastSquare(self) -> Callable[[float], float]:
-        # 使用 Chebyshev 节点来拟合函数
-        ch = ChebyshevApproximator(
-            tar_func=self.tar_func,
-            start=self.start,
-            end=self.end,
-            num_points=self.num_points
-        )
 
-        return ch.least_squares()
-        # return ch.least_squares_perpetuated()
 
     def record_x(self,sampling_option:str):
         path_x = osp.join(local_setting.PATH_DATA,'prompts','x_table.json')
