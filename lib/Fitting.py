@@ -23,6 +23,7 @@ class FittingToolkit():
         if sampling_option == 'uniform':
             self.x = np.linspace(start, end, num_points)
         elif sampling_option == 'Chebyshev':
+            ic()
             self.x = EvalTool.chebyshev_nodes(start, end, num_points-1)
         elif sampling_option == 'random':
             self.x = np.random.uniform(start, end, num_points)
@@ -34,6 +35,7 @@ class FittingToolkit():
         with open(path_prompts, 'r') as file:
             prompts = json.load(file)
         prompts['tar_func'] = eval(prompts['tar_func'])
+        ic(prompts['tar_func'])
         return FittingToolkit(**prompts)
     
     def newton(self)->Callable[[float],float]:
@@ -57,8 +59,9 @@ class FittingToolkit():
             end=self.end,
             num_points=self.num_points
         )
-        # return ch.least_squares()
-        return ch.least_squares_perpetuated()
+
+        return ch.least_squares()
+        # return ch.least_squares_perpetuated()
 
     def record_x(self,sampling_option:str):
         path_x = osp.join(local_setting.PATH_DATA,'prompts','x_table.json')

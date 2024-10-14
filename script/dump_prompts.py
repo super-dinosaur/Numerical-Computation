@@ -2,7 +2,7 @@ import json
 import numpy as np
 import SCRIPT_CONFITG
 import os.path as osp
-
+import argparse
 from icecream import ic
 sampling_option = 'Chebyshev'
 
@@ -16,11 +16,16 @@ if __name__ == '__main__':
     #     'end': 1,
     #     'sampling_option': sampling_option
     # }
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--n', type=int, default=2)
+    parser.add_argument('--s', type=float, default=0)
+    parser.add_argument('--e', type=float, default=16)
+    args = parser.parse_args()
     prompts = {
         'tar_func': 'lambda x: 5*np.sin(1*x) + 4*np.cos(3*x)',
-        'num_points': 15,
-        'start': -9,
-        'end': 1,
+        'num_points': args.n,
+        'start': args.s,
+        'end': args.e,
         'sampling_option': sampling_option
     }
     path_prompts = osp.join(SCRIPT_CONFITG.PATH_DATA,'prompts','prompts.json')

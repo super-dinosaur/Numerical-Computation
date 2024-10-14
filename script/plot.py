@@ -94,6 +94,25 @@ class ploter():
         plt.show()
         ic(path_contrast)
 
+    @staticmethod
+    def basic_plot(
+        gt:np.ndarray,
+        pred:np.ndarray,
+        x:np.ndarray,
+        title:str='Basic Plot'
+    ):
+        plt.plot(x,gt,label='Ground Truth')
+        plt.plot(x,pred,label='Prediction')
+        plt.legend()
+        plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+        plt.title(title)
+        plt.xlabel('x')
+        plt.ylabel('y')
+        path_basic = osp.join(SCRIPT_CONFITG.PATH_DATA,'basic.png')
+        plt.savefig(path_basic)
+        plt.show()
+        ic(path_basic)
+
 if __name__ == '__main__':
     path_error = {
         'uniform': osp.join(SCRIPT_CONFITG.PATH_DATA, 'error', 'uniform_error.pkl'),
