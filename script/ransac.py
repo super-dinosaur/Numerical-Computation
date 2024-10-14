@@ -1,23 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import Callable, List
+import SCRIPT_CONFITG
+from lib.Chebytool import ChebyshevApproximator
+from typing import Callable
 
-# 定义目标函数
 def target_function(x):
     return 5 * np.sin(x) + 4 * np.cos(3 * x)
 
-# 生成切比雪夫节点
 def generate_chebyshev_nodes(start: float, end: float, num_points: int) -> np.ndarray:
     k = np.arange(1, num_points + 1)
     x_cheb = np.cos((2 * k - 1) / (2 * num_points) * np.pi)
     x_nodes = 0.5 * (x_cheb + 1) * (end - start) + start
     return x_nodes
 
-# 生成采样点并添加噪声
 def generate_samples(tar_func: Callable[[float], float], start: float, end: float, num_points: int, noise_std: float = 0.5):
     x_samples = generate_chebyshev_nodes(start, end, num_points)
     y_samples = tar_func(x_samples)
-    # 添加高斯噪声
     y_noisy = y_samples + np.random.normal(0, noise_std, size=y_samples.shape)
     return x_samples, y_noisy
 
@@ -50,7 +48,7 @@ def ransac(
 
         # 计算所有数据点的误差
         y_pred = model(x_data)
-        errors = loss_func(y_data, y_pred)
+        errors = loss_func(x_data, y_data, model)
 
         # 识别内点（误差小于阈值的点）
         inliers = np.where(errors < threshold)[0]
@@ -67,28 +65,37 @@ def ransac(
     return best_model, best_inliers
 
 def fit_chebyshev_model(x: np.ndarray, y: np.ndarray, degree: int = 4) -> Callable[[float], float]:
-    # 将 x 映射到 [-1, 1]
     x_min, x_max = x.min(), x.max()
-    x_transformed = (2 * x - (x_min + x_max)) / (x_max - x_min)
 
-    # 构建切比雪夫多项式矩阵
-    T = np.polynomial.chebyshev.chebvander(x_transformed, degree)
+    # 创建 ChebyshevApproximator 实例
+    approximator = ChebyshevApproximator(
+        tar_func=None,
+        start=x_min,
+        end=x_max,
+        degree=degree
+    )
 
-    # 计算最小二乘拟合系数
-    coeffs, residuals, rank, s = np.linalg.lstsq(T, y, rcond=None)
+    fitted_function, coeffs = approximator.fit_nodes(nodes=x, values=y)
 
-    # 返回拟合函数
-    def chebyshev_model(x_input):
-        x_input_transformed = (2 * x_input - (x_min + x_max)) / (x_max - x_min)
-        T_input = np.polynomial.chebyshev.chebvander(x_input_transformed, degree)
-        y_output = T_input @ coeffs
-        return y_output
+    return fitted_function
 
-    return chebyshev_model
+from scipy.optimize import minimize_scalar
 
-def loss_function(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
-    # 使用绝对误差作为损失函数
-    return np.abs(y_true - y_pred)
+def loss_function_min_distance(x_data, y_data, model_func):
+    losses = []
+    for x0, y0 in zip(x_data, y_data):
+        # 定义目标函数 h(x)
+        def h(x):
+            return (x - x0)**2 + (model_func(x) - y0)**2
+
+        # 在区间 [start, end] 上最小化 h(x)
+        res = minimize_scalar(h, bounds=(start, end), method='bounded')
+
+        # 最小距离的平方根作为损失
+        min_distance = np.sqrt(res.fun)
+        losses.append(min_distance)
+
+    return np.array(losses)
 
 if __name__ == '__main__':
     # 设置参数
@@ -96,7 +103,7 @@ if __name__ == '__main__':
     end = 5
     num_points = 100
     noise_std = 1.0  # 噪声标准差
-    degree = 7       # 多项式次数
+    degree = 9      # 多项式次数
     threshold = 2.0  # 误差阈值
     max_iterations = 1000
     min_inliers = 30  # 最小内点数
@@ -109,7 +116,7 @@ if __name__ == '__main__':
         x_data=x_samples,
         y_data=y_noisy,
         model_func=lambda x, y: fit_chebyshev_model(x, y, degree),
-        loss_func=loss_function,
+        loss_func=loss_function_min_distance,
         threshold=threshold,
         max_iterations=max_iterations,
         min_inliers=min_inliers

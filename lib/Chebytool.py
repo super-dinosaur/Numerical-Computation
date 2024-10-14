@@ -7,7 +7,7 @@ class ChebyshevApproximator:
         self.tar_func = tar_func
         self.start = start
         self.end = end
-        self.degree = degree  # Highest degree of the polynomial, updating previous usage of num_points
+        self.degree = degree  # Highest degree of the polynomial
 
         # Transformation functions to map [start, end] to [-1, 1]
         self.transform = lambda x: (2 * x - (self.start + self.end)) / (self.end - self.start)
@@ -43,8 +43,9 @@ class ChebyshevApproximator:
             P_k = make_Pk(P_k_minus_1, P_k_minus_2)
             P.append(P_k)
         return P
-    
+
     def get_chebyshev_basis_array(self, x: np.ndarray) -> np.ndarray:
+        x = self.transform(x)
         T = np.zeros((len(x), self.degree + 1))
         T[:, 0] = 1
         if self.degree >= 1:
@@ -74,15 +75,14 @@ class ChebyshevApproximator:
 
         return np.vectorize(S)
 
-    def fit_nodes(self, nodes: np.ndarray, values: np.ndarray) -> Callable[[float], float]:
-        #和上面的least_squares方法稍有区别，但是思路是一样的，目的也一样，提供第二种解题思路
+    def fit_nodes(self, nodes: np.ndarray, values: np.ndarray):
         x_transformed = self.transform(nodes)
         A = np.zeros((len(nodes), self.degree + 1))
         chebyshev_basis = self.get_chebyshev_basis()
         for k, P_k in enumerate(chebyshev_basis):
             A[:, k] = P_k(x_transformed)
 
-        # (A^T A) c = A^T y
+        # Solve (A^T A) c = A^T y using your own Gaussian elimination
         ATA = A.T @ A
         ATy = A.T @ values
         c = EvalTool.gaussian_elimination(ATA, ATy)
@@ -91,4 +91,4 @@ class ChebyshevApproximator:
             x_t = self.transform(x)
             return sum(c_k * P_k(x_t) for c_k, P_k in zip(c, chebyshev_basis))
 
-        return np.vectorize(S)
+        return np.vectorize(S), c
