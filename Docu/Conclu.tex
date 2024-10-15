@@ -3,6 +3,7 @@
 \usepackage{graphicx} % Required for inserting images
 \usepackage{subfig}
 \usepackage{float}
+\usepackage{amsmath}
 \usepackage[colorlinks=true, linkcolor=blue, urlcolor=red, citecolor=red]{hyperref} % 超链接支持
 \title{第三章函数拟合实验总结}
 \author{樊建琦}
@@ -26,7 +27,6 @@
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8 \textwidth]{prob1/sub_error_uniform.png}
-    \caption{Caption}
     \label{fig:uniform}
 \end{figure}
 三种方法对比图如\hyperref[fig:contrast]{Fig.1-3 }所示，切比雪夫与随机取样显然优于均匀采样，且龙格效应被大幅度抑制。
@@ -84,4 +84,19 @@ a,b为输入参数区间，目标函数形如$c \cdot \sin(d \cdot x) + e \cdot 
     \caption*{Fig.3.6 degree:4,segments:8}
     \label{fig:3-6}
 \end{figure}
+\section{RANSAC}
+算法简述：我们假设有一个池子，里面是100个采样点，这些采样点得到的y都带有噪声而且噪声程度不确定（代码用高斯分布模拟），我们在预知图像基本分布后决定一组用7个采样点（这个很重要），于是我们遍历这$\binom{100}{7}$个独异的组合，每次遍历都会剩余93个点，这93需要经过loss函数判断，如果此时的x得到的pred\_y和gt\_y的损失可接受（落在阈值以里）那么可信度++，最后选出来可信度最高的一个组合推到的模型，这个模型就是我代码里面fitting\_nodes()得到的一组二元匿名函数($S(x) = \sum_{k=0}^{m} c_k T_k(x)$,S和T都已知了用高斯消元解方程即可)
+其中耐人寻味的是loss函数的设计，一开始我很朴实的用同$x$下的两个$y$相减，但是后来发现这对于$x$方向上偏移量大的曲线来讲误差极大。现构造一函数
+\[
+h(x) = (x - x_0)^2 + (f(x) - y_0)^2
+\]
+$h(x)$最小就相当于让曲线上任意一个点距离给定的$(x_0, y_0)$最小了，一步一步走最快的下坡路迭代即可。这里如若选择\texttt{from scipy.optimize import minimize\_scalar}让他快速收敛到最小值的话，可以得到非常好的去噪效果，如\hyperref[fig:4-1]{Fig.4-1}所示，此时内点数仅有30$\%$，阈值控制在1，采样点为7。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{fig4.png}
+    \caption*{Fig.4-1 left: normal-loss, right: min\_scalar}
+    \label{fig:4-1}
+\end{figure}
+
 \end{document}
