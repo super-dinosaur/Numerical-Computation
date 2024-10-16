@@ -1,7 +1,0 @@
-{
-    "tar_func": "lambda x: 1/(1+25*x**2)",
-    "num_points": 50,
-    "start": -1,
-    "end": 1,
-    "sampling_option": "random"
-}
