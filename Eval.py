@@ -4,6 +4,14 @@ from typing import Callable
 
 
 class EvalTool:
+
+    @staticmethod
+    def check_convergence(T:np.ndarray,i:int,epsilon=10e-6):
+        if abs(T[i][i] - T[i-1][i-1]) < epsilon:
+            return True
+        return False
+        
+
     @staticmethod   
     def determine_nodes_by_precision(a, b, epsilon,method='Composite Trapezoidal Rule')->int:
         #f_ = lambda x: np.sqrt(x) * np.log(x)
